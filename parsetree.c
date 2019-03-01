@@ -66,7 +66,7 @@ static void Print(Node root, int level)
             printf("/\n");
             break;
         case number:
-            printf("%ld\n", root->val);
+            printf("%d\n", root->val);
             break;
         }
         Print(root->left, level + 1);
@@ -177,8 +177,8 @@ static Node Term()
             res = malloc(sizeof(NodeDesc));
             res->kind = times;
             res->val = par1->val * par2->val;
-            res->left = NULL;
-            res->right = NULL;
+            res->left = par1;
+            res->right = par2;
             // res = par1 * par2;
         }
         else if (temp == divide)
@@ -186,8 +186,8 @@ static Node Term()
             res = malloc(sizeof(NodeDesc));
             res->kind = divide;
             res->val = par1->val / par2->val;
-            res->left = NULL;
-            res->right = NULL;
+            res->left = par1;
+            res->right = par2;
             // res = par1 / par2;
         }
         else if (temp == mod)
@@ -195,8 +195,8 @@ static Node Term()
             res = malloc(sizeof(NodeDesc));
             res->kind = mod;
             res->val = par1->val % par2->val;
-            res->left = NULL;
-            res->right = NULL;
+            res->left = par1;
+            res->right = par2;
             // res = par1 % par2;
         }
         par1 = res;
@@ -209,9 +209,8 @@ static Node Expr()
         sym = SGet();
     register Node res;
 
-    // int res;
     register Node par1 = Term();
-    // int par1 = Term();
+
     res = par1;
     while ((sym == plus) || (sym == minus))
     {
@@ -224,18 +223,18 @@ static Node Expr()
             res = malloc(sizeof(NodeDesc));
             res->kind = plus;
             res->val = par1->val + par2->val;
-            res->left = NULL;
-            res->right = NULL;
+            res->left = par1;
+            res->right = par2;
         }
         else if (temp == minus)
         {
             res = malloc(sizeof(NodeDesc));
             res->kind = minus;
             res->val = par1->val - par2->val;
-            res->left = NULL;
-            res->right = NULL;
+            res->left = par1;
+            res->right = par2;
         }
-        par1 = res;
+        par1->val = res->val;
     }
     return res;
 }
@@ -249,6 +248,7 @@ int main(int argc, char *argv[])
         Node result = Expr();
         assert(sym == eof);
         printf("result = %d\n", result->val);
+        Print(result, 0);
     }
     else
     {
