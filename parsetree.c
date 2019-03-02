@@ -50,7 +50,7 @@ static void Print(Node root, int level)
     {
         Print(root->right, level + 1);
         for (i = 0; i < level; i++)
-            printf(" ");
+            printf("\t");
         switch (root->kind)
         {
         case plus:
@@ -176,7 +176,8 @@ static Node Term()
         {
             res = malloc(sizeof(NodeDesc));
             res->kind = times;
-            res->val = par1->val * par2->val;
+            // res->val = par1->val * par2->val;
+            res->val = par1->val;
             res->left = par1;
             res->right = par2;
             // res = par1 * par2;
@@ -185,7 +186,8 @@ static Node Term()
         {
             res = malloc(sizeof(NodeDesc));
             res->kind = divide;
-            res->val = par1->val / par2->val;
+            // res->val = par1->val / par2->val;
+            res->val = par1->val;
             res->left = par1;
             res->right = par2;
             // res = par1 / par2;
@@ -194,7 +196,8 @@ static Node Term()
         {
             res = malloc(sizeof(NodeDesc));
             res->kind = mod;
-            res->val = par1->val % par2->val;
+            // res->val = par1->val % par2->val;
+            res->val = par1->val;
             res->left = par1;
             res->right = par2;
             // res = par1 % par2;
@@ -222,7 +225,8 @@ static Node Expr()
         {
             res = malloc(sizeof(NodeDesc));
             res->kind = plus;
-            res->val = par1->val + par2->val;
+            // res->val = par1->val + par2->val;
+            res->val = par1->val;
             res->left = par1;
             res->right = par2;
         }
@@ -230,7 +234,8 @@ static Node Expr()
         {
             res = malloc(sizeof(NodeDesc));
             res->kind = minus;
-            res->val = par1->val - par2->val;
+            // res->val = par1->val - par2->val;
+            res->val = par1->val;
             res->left = par1;
             res->right = par2;
         }
@@ -247,7 +252,7 @@ int main(int argc, char *argv[])
         sym = SGet();
         Node result = Expr();
         assert(sym == eof);
-        printf("result = %d\n", result->val);
+        // printf("result = %d\n", result->val);
         Print(result, 0);
     }
     else
