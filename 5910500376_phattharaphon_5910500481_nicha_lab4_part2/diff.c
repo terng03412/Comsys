@@ -386,7 +386,7 @@ int main(int argc, char *argv[])
         SInit(argv[1]);
         sym = SGet();
         root = Expr();
-        assert(sym == eof);
+        // assert(sym == eof);
 
         printf("PreFix: \t");
         PreF(root);
