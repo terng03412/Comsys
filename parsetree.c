@@ -146,6 +146,7 @@ static Node Factor()
     assert((sym == number) || (sym == lparen));
     if (sym == number)
     {
+        // printf("f1 ");
         res = malloc(sizeof(NodeDesc));
         res->kind = number;
         res->val = val;
@@ -156,6 +157,7 @@ static Node Factor()
     }
     else
     {
+        // printf("f2 ");
         sym = SGet();
         res = Expr();
         assert(sym == rparen);
@@ -167,7 +169,7 @@ static Node Factor()
 static Node Term()
 {
     register Node res;
-
+    // printf("T ");
     Node par1 = Factor();
     res = par1;
     while ((sym == times) || (sym == divide) || (sym == mod))
@@ -177,6 +179,7 @@ static Node Term()
         Node par2 = Factor();
         if (temp == times)
         {
+            printf("tt ");
             res = malloc(sizeof(NodeDesc));
             res->kind = times;
             // res->val = par1->val * par2->val;
@@ -187,6 +190,7 @@ static Node Term()
         }
         else if (temp == divide)
         {
+            printf("td ");
             res = malloc(sizeof(NodeDesc));
             res->kind = divide;
             // res->val = par1->val / par2->val;
@@ -197,6 +201,7 @@ static Node Term()
         }
         else if (temp == mod)
         {
+            printf("tm ");
             res = malloc(sizeof(NodeDesc));
             res->kind = mod;
             // res->val = par1->val % par2->val;
@@ -213,36 +218,25 @@ static Node Expr()
 {
     if ((sym == minus) || (sym == plus))
         sym = SGet();
-    register Node res;
 
+    register Node res;
     register Node par1 = Term();
 
     res = par1;
     while ((sym == plus) || (sym == minus))
     {
+
         int temp = sym;
         sym = SGet();
         register Node par2 = Term();
-        // int par2 = Term();
-        if (temp == plus)
-        {
-            res = malloc(sizeof(NodeDesc));
-            res->kind = plus;
-            // res->val = par1->val + par2->val;
-            res->val = par1->val;
-            res->left = par1;
-            res->right = par2;
-        }
-        else if (temp == minus)
-        {
-            res = malloc(sizeof(NodeDesc));
-            res->kind = minus;
-            // res->val = par1->val - par2->val;
-            res->val = par1->val;
-            res->left = par1;
-            res->right = par2;
-        }
-        par1->val = res->val;
+
+        res = malloc(sizeof(NodeDesc));
+        res->kind = temp;
+        res->val = par1->val;
+        res->left = par1;
+        res->right = par2;
+
+        par1 = res;
     }
     return res;
 }
