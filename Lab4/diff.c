@@ -1,3 +1,4 @@
+
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -113,73 +114,72 @@ static Node Expr();
 
 static Node Factor()
 {
-    register Node res;
+    register Node result;
     assert((sym == number) || (sym == lparen) || (sym = var));
     if ((sym == number) || (sym == var))
     {
-        // printf("f1 ");
-        res = malloc(sizeof(NodeDesc));
-        res->kind = number;
-        res->val = val;
-        res->left = NULL;
-        res->right = NULL;
-
+        result = malloc(sizeof(NodeDesc));
+        result->kind = sym;
+        result->val = val;
+        result->left = NULL;
+        result->right = NULL;
         sym = SGet();
     }
     else
     {
-        // printf("f2 ");
         sym = SGet();
-        res = Expr();
+        result = Expr();
         assert(sym == rparen);
         sym = SGet();
     }
-    return res;
+    return result;
 }
 
 static Node Term()
 {
-    register Node res;
-    // printf("T ");
-    Node par1 = Factor();
-    res = par1;
+    register Node root, result;
+    register Node par1 = Factor();
+    root = par1;
     while ((sym == times) || (sym == divide) || (sym == mod))
     {
         int temp = sym;
         sym = SGet();
-        Node par2 = Factor();
 
-        // printf("tt ");
-        res = malloc(sizeof(NodeDesc));
-        res->kind = temp;
-        // res->val = par1->val * par2->val;
-        res->val = par1->val;
-        res->left = par1;
-        res->right = par2;
-        // res = par1 * par2;
-        par1 = res;
-    }
-    return res;
-}
-
-static Node Expr()
-{
-    register Node result, root;
-
-    root = Term();
-    while (sym == plus || sym == minus)
-    {
         result = malloc(sizeof(NodeDesc));
-        result->kind = sym;
+        result->kind = temp;
+
         sym = SGet();
         result->left = root;
-        result->right = Term();
+
+        register Node par2 = Factor();
+        result->right = par2;
         root = result;
     }
     return root;
 }
 
-static void prefix(Node root)
+static Node Expr()
+{
+    register Node result, root;
+    register Node par1 = Term();
+    root = par1;
+    while (sym == plus || sym == minus)
+    {
+        int temp = sym;
+        sym = SGet();
+
+        result = malloc(sizeof(NodeDesc));
+        result->kind = temp;
+
+        result->left = root;
+        register Node par2 = Term();
+        result->right = par2;
+        root = result;
+    }
+    return root;
+}
+
+static void PreF(Node root)
 {
     if (root != NULL)
     {
@@ -209,17 +209,17 @@ static void prefix(Node root)
         }
         printf(" ");
 
-        prefix(root->left);
-        prefix(root->right);
+        PreF(root->left);
+        PreF(root->right);
     }
 }
 
-static void postfix(Node root)
+static void PosF(Node root)
 {
     if (root != NULL)
     {
-        postfix(root->left);
-        postfix(root->right);
+        PosF(root->left);
+        PosF(root->right);
 
         switch (root->kind)
         {
@@ -249,7 +249,7 @@ static void postfix(Node root)
     }
 }
 
-static void infix(Node root)
+static void InF(Node root)
 {
     if (root != NULL)
     {
@@ -257,7 +257,7 @@ static void infix(Node root)
         {
             printf("( ");
         }
-        infix(root->left);
+        InF(root->left);
 
         switch (root->kind)
         {
@@ -285,7 +285,7 @@ static void infix(Node root)
         }
         printf(" ");
 
-        infix(root->right);
+        InF(root->right);
         if (root->left != NULL && root->right != NULL)
         {
             printf(") ");
@@ -293,21 +293,23 @@ static void infix(Node root)
     }
 }
 
-static Node Diff(Node root)
+static Node diff(Node root)
 {
 
-    register Node result, l, r, d, ll, lr;
+    register Node result, Left, Right, d, ll, lr;
 
     if ((root->kind == number) || (root->kind == var))
     {
         result = malloc(sizeof(NodeDesc));
         result->kind = number;
-
         if (root->kind == number)
+        {
             result->val = 0;
+        }
         else
+        {
             result->val = 1;
-
+        }
         result->left = NULL;
         result->right = NULL;
         return result;
@@ -316,8 +318,8 @@ static Node Diff(Node root)
     {
         result = malloc(sizeof(NodeDesc));
         result->kind = root->kind;
-        result->left = Diff(root->left);
-        result->right = Diff(root->right);
+        result->left = diff(root->left);
+        result->right = diff(root->right);
         return result;
     }
     else if (root->kind == times)
@@ -325,18 +327,18 @@ static Node Diff(Node root)
         result = malloc(sizeof(NodeDesc));
         result->kind = plus;
 
-        l = malloc(sizeof(NodeDesc));
-        l->kind = times;
-        l->left = Diff(root->left);
-        l->right = root->right;
+        Left = malloc(sizeof(NodeDesc));
+        Left->kind = times;
+        Left->left = diff(root->left);
+        Left->right = root->right;
 
-        r = malloc(sizeof(NodeDesc));
-        r->kind = times;
-        r->left = root->left;
-        r->right = Diff(root->right);
+        Right = malloc(sizeof(NodeDesc));
+        Right->kind = times;
+        Right->left = root->left;
+        Right->right = diff(root->right);
 
-        result->left = l;
-        result->right = r;
+        result->left = Left;
+        result->right = Right;
         return result;
     }
     else if (root->kind == divide)
@@ -344,27 +346,27 @@ static Node Diff(Node root)
         result = malloc(sizeof(NodeDesc));
         result->kind = divide;
 
-        l = malloc(sizeof(NodeDesc));
-        l->kind = minus;
+        Left = malloc(sizeof(NodeDesc));
+        Left->kind = minus;
         ll = malloc(sizeof(NodeDesc));
         ll->kind = times;
         ll->left = root->right;
-        ll->right = Diff(root->left);
+        ll->right = diff(root->left);
 
         lr = malloc(sizeof(NodeDesc));
         lr->kind = times;
         lr->left = root->left;
-        lr->right = Diff(root->right);
+        lr->right = diff(root->right);
 
-        l->left = ll;
-        l->right = lr;
+        Left->left = ll;
+        Left->right = lr;
 
         d = malloc(sizeof(NodeDesc));
         d->kind = times;
         d->left = root->right;
         d->right = root->right;
 
-        result->left = l;
+        result->left = Left;
         result->right = d;
 
         return result;
@@ -373,38 +375,35 @@ static Node Diff(Node root)
     {
         printf("Unsupported operator %d\n", root->kind);
     }
-    return result;
 }
 
 int main(int argc, char *argv[])
 {
     Node root;
-    Node Diffroot;
-
-    register Node result, Dif;
+    Node diffroot;
 
     if (argc == 2)
     {
         SInit(argv[1]);
         sym = SGet();
-        result = Expr();
+        root = Expr();
         assert(sym == eof);
 
-        printf("prefix: \t");
-        prefix(result);
+        printf("PreFix: \t");
+        PreF(root);
         printf("\n");
 
-        printf("infix: \t\t");
-        infix(result);
+        printf("InFix: \t\t");
+        InF(root);
         printf("\n");
 
-        printf("postfix: \t");
-        postfix(result);
+        printf("PostFix: \t");
+        PosF(root);
         printf("\n");
 
-        Dif = Diff(result);
-        printf("dif infix: \t");
-        infix(Dif);
+        diffroot = diff(root);
+        printf("Diff infix :\t");
+        InF(diffroot);
         printf("\n");
     }
     else
