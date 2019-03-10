@@ -5,7 +5,7 @@
 static FILE *f;
 static int ch;
 static unsigned int val;
-
+int check;
 typedef struct NodeDesc *Node;
 typedef struct NodeDesc
 {
@@ -400,86 +400,79 @@ static int EquationTree(Node LeftRoot, Node RightRoot)
     return 0;
 }
 
-static Node Simplify(Node root, int *ptrSim)
+static Node Simplify(Node root)
 {
-    register Node result;
-
-    if (root == NULL)
+    Node temp;
+    if ((root == NULL) || ((root->kind == number) || (root->kind == var)))
         return root;
-
-    if ((root->kind == number) || (root->kind == var))
-        return root;
-
     if (root->kind == times)
     {
         if (((root->left)->kind == number) && ((root->left)->val == 0))
         {
-            *ptrSim = 1;
+            check = 1;
             return root->left;
         }
-
-        if (((root->right)->kind == number) && ((root->right)->val == 0))
+        if (((root->right)->kind == number) && ((root->right)->val) == 0)
         {
-            *ptrSim = 1;
+            check = 1;
             return root->right;
         }
-
+        if (((root->right)->kind == number) && ((root->right)->val) == 1)
+        {
+            check = 1;
+            return root->left;
+        }
         if (((root->left)->kind == number) && ((root->left)->val) == 1)
         {
-            *ptrSim = 1;
+            check = 1;
             return root->right;
-        }
-
-        if (((root->right)->kind == number) && ((root->right)->val == 1))
-        {
-            *ptrSim = 1;
-            return root->left;
         }
     }
     else if (root->kind == plus)
     {
-
         if (((root->left)->kind == number) && ((root->left)->val == 0))
         {
-            *ptrSim = 1;
+            check = 1;
             return root->right;
         }
-
         if (((root->right)->kind == number) && ((root->right)->val == 0))
         {
-            *ptrSim = 1;
+            check = 1;
             return root->left;
         }
-
-        if (EquationTree(root->left, root->right) == 1)
+        if (((root->left)->kind) == ((root->right)->kind))
         {
-            *ptrSim = 1;
-            result = malloc(sizeof(NodeDesc));
-            result->kind = number;
-            result->val = 2;
-            result->left = NULL;
-            result->right = NULL;
-            root->left = result;
-            root->kind = times;
-            return root;
+            if ((root->left)->kind == var)
+            {
+                temp = malloc(sizeof(NodeDesc));
+                temp->kind = number;
+                temp->val = 2;
+                temp->left = NULL;
+                temp->right = NULL;
+                root->left = temp;
+                root->kind = times;
+                check = 1;
+                return root;
+            }
         }
     }
     else if (root->kind == minus)
     {
-        if (EquationTree(root->left, root->right) != 0)
+        if (((root->left)->kind) == ((root->right)->kind))
         {
-            *ptrSim = 1;
-            result = malloc(sizeof(NodeDesc));
-            result->kind = number;
-            result->val = 0;
-            result->left = NULL;
-            result->right = NULL;
-            root = result;
-            return root;
+            if (((root->left)->kind) == var)
+            {
+                root->kind = number;
+                root->val = 0;
+                root->left = NULL;
+                root->right = NULL;
+                check = 1;
+                return root;
+            }
         }
     }
-    root->left = Simplify(root->left, ptrSim);
-    root->right = Simplify(root->right, ptrSim);
+    root->left = Simplify(root->left);
+    root->right = Simplify(root->right);
     return root;
 }
 
@@ -526,9 +519,6 @@ int main(int argc, char *argv[])
         SInit(argv[1]);
         sym = SGet();
         result = Expr();
-        // assert(sym == eof);
-        // printf("result = %d\n", result->val);
-        // Print(result, 0);
 
         printf("PreFix: \t");
         PreF(result);
@@ -553,7 +543,7 @@ int main(int argc, char *argv[])
         while (simp)
         {
             simp = 0;
-            Simpl = Simplify(Simpl, &simp);
+            Simpl = Simplify(Simpl);
         }
         printf("simp InF: \t");
         InF(Simpl);
