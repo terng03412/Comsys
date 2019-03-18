@@ -55,6 +55,6 @@
         lw      $ra, 4($sp)     #return address
         addi    $sp, $sp, 8     #pop 2 items
         addi    $v0, $v0, 1     # result = 1 + result
-        jr      $ra             # returnx
+        jr      $ra             # return
         
         

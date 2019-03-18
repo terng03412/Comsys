@@ -11,7 +11,7 @@ main:
     li  $t3, 1890    # m = 1890
     li  $t4, 3315    # n = 3315
 
-    add  $v0, $0, 0
+    # add  $v0, $0, 0
     li   $v0, 4
     la   $a0, intro  # print 
     syscall
