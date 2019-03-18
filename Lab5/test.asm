@@ -4,13 +4,11 @@ main:
 li $a0 3
 sw $a0, 0($sp)
 addi $sp, $sp, -4
-li $a0 5
-sw $a0, 0($sp)
-addi $sp, $sp, -4
-li $a0 7
+li $a0 4
 lw $t1, 4($sp)
-add $a0, $a0, $t1
+mul $a0, $a0, $t1
 addi $sp, $sp, 4
+li $a0 5
 lw $t1, 4($sp)
 add $a0, $a0, $t1
 addi $sp, $sp, 4

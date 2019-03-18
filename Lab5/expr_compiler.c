@@ -1,6 +1,7 @@
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
+
 static FILE *f;
 static int ch;
 static unsigned int val;
