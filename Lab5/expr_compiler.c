@@ -184,6 +184,7 @@ static int Expr()
 }
 int main(int argc, char *argv[])
 {
+    printf(".text # text section \n.globl main # call main by SPIM \nmain:\n");
     register int result;
     if (argc == 2)
     {
@@ -191,11 +192,13 @@ int main(int argc, char *argv[])
         sym = SGet();
         int result = Expr();
         assert(sym == eof);
-        printf("result = %d\n", result);
+        // printf("result = %d\n", result);
     }
     else
     {
         printf("usage: expreval <filename>\n");
     }
+    printf("li   $v0, 1\nsyscall\n");
+    printf("end:\nori   $v0, $0, 10  # system call 10 for exit\nsyscall            # we are out of here.\n");
     return 0;
 }
