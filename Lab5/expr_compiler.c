@@ -1,9 +1,19 @@
+
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 static FILE *f;
 static int ch;
 static unsigned int val;
+
+typedef struct NodeDesc *Node;
+typedef struct NodeDesc
+{
+    char kind;        // plus, minus, times, divide, number
+    int val;          // number: value
+    Node left, right; // plus, minus, times, divide: children
+} NodeDesc;
+
 enum
 {
     plus,
@@ -17,6 +27,7 @@ enum
     eof,
     illegal
 };
+
 static void SInit(char *filename)
 {
     ch = EOF;
@@ -24,6 +35,7 @@ static void SInit(char *filename)
     if (f != NULL)
         ch = getc(f);
 }
+
 static void Number()
 {
     val = 0;
@@ -32,15 +44,14 @@ static void Number()
         val = val * 10 + ch - '0';
         ch = getc(f);
     }
-
-    printf("li $a0 %d \nsw $a0, 0($sp) \naddi $sp, $sp, -4\n", val);
 }
+
 static int SGet()
 {
     register int sym;
+
     while ((ch != EOF) && (ch <= ' '))
         ch = getc(f);
-
     switch (ch)
     {
     case EOF:
@@ -85,120 +96,134 @@ static int SGet()
     case '8':
     case '9':
         sym = number;
-
         Number();
         break;
-
     default:
         sym = illegal;
     }
-
     return sym;
 }
+
 static int sym;
-static int Expr();
-static int Factor()
+static Node Expr();
+
+static Node Factor()
 {
-    int res;
+    register Node result;
     assert((sym == number) || (sym == lparen));
     if (sym == number)
     {
+        result = malloc(sizeof(NodeDesc));
+        result->kind = sym;
+        result->val = val;
+        result->left = NULL;
+        result->right = NULL;
         sym = SGet();
-        res = val;
     }
     else
     {
         sym = SGet();
-        res = Expr();
+        result = Expr();
         assert(sym == rparen);
         sym = SGet();
     }
-    return res;
+    return result;
 }
-static int Term()
+
+static Node Term()
 {
-    int res;
-    int par1 = Factor();
-
-    // printf("li $a0 %d \nsw $a0, 0($sp) \naddi $sp, $sp, -4\n", par1);
-
-    res = par1;
+    register Node root, result;
+    register Node par1 = Factor();
+    root = par1;
     while ((sym == times) || (sym == divide) || (sym == mod))
     {
         int temp = sym;
         sym = SGet();
-        int par2 = Factor();
 
-        // printf("li $a0 %d \nsw $a0, 0($sp) \naddi $sp, $sp, -4\n", par2);
-        if (temp == times)
-        {
-            res = par1 * par2;
+        result = malloc(sizeof(NodeDesc));
+        result->kind = temp;
 
-            printf("lw $t1, 4($sp) \nmul $a0, $a0, $t1 \naddi $sp, $sp, 4\n");
-        }
-        else if (temp == divide)
-        {
-            res = par1 / par2;
-
-            printf("lw $t1, 4($sp) \ndiv $a0, $a0, $t1 \naddi $sp, $sp, 4\n");
-        }
-        else if (temp == mod)
-        {
-            res = par1 % par2;
-
-            printf("lw $t1, 4($sp) \nmod $a0, $a0, $t1 \naddi $sp, $sp, 4\n");
-        }
-        par1 = res;
-    }
-    return res;
-}
-static int Expr()
-{
-    if ((sym == minus) || (sym == plus))
         sym = SGet();
-    int res;
-    int par1 = Term();
+        result->left = root;
 
-    res = par1;
-    while ((sym == plus) || (sym == minus))
+        register Node par2 = Factor();
+        result->right = par2;
+        root = result;
+    }
+    return root;
+}
+
+static Node Expr()
+{
+    register Node result, root;
+    register Node par1 = Term();
+    root = par1;
+    while (sym == plus || sym == minus)
     {
         int temp = sym;
         sym = SGet();
-        int par2 = Term();
 
-        if (temp == plus)
-        {
-            res = par1 + par2;
+        result = malloc(sizeof(NodeDesc));
+        result->kind = temp;
 
-            printf("lw $t1, 4($sp) \nadd $a0, $a0, $t1 \naddi $sp, $sp, 4\n");
-        }
-        else if (temp == minus)
-        {
-            res = par1 - par2;
-
-            printf("lw $t1, 4($sp) \nsub $a0, $a0, $t1 \naddi $sp, $sp, 4\n");
-        }
-        par1 = res;
+        result->left = root;
+        register Node par2 = Term();
+        result->right = par2;
+        root = result;
     }
-    return res;
+    return root;
 }
+
+static void PosF(Node root)
+{
+    if (root != NULL)
+    {
+        PosF(root->left);
+        PosF(root->right);
+
+        switch (root->kind)
+        {
+        case plus:
+            printf("+");
+            break;
+        case minus:
+            printf("-");
+            break;
+        case times:
+            printf("*");
+            break;
+        case divide:
+            printf("/");
+            break;
+        case mod:
+            printf("%%");
+            break;
+        case number:
+            printf("%d", root->val);
+            break;
+        }
+        printf(" ");
+    }
+}
+
 int main(int argc, char *argv[])
 {
-    printf(".text # text section \n.globl main # call main by SPIM \nmain:\n");
-    register int result;
+    register Node root, DifRoot;
+
     if (argc == 2)
     {
         SInit(argv[1]);
         sym = SGet();
-        int result = Expr();
-        assert(sym == eof);
-        // printf("result = %d\n", result);
+        root = Expr();
+        // assert(sym == eof);
+
+        printf("PostFix: \t");
+        PosF(root);
+        printf("\n");
     }
     else
     {
         printf("usage: expreval <filename>\n");
     }
-    printf("li   $v0, 1\nsyscall\n");
-    printf("end:\nori   $v0, $0, 10  # system call 10 for exit\nsyscall            # we are out of here.\n");
     return 0;
 }
