@@ -56,15 +56,12 @@ static void GenMIPs(Node root, int pos)
             fprintf(fp, "sw $a0, 0($sp)\n");
             fprintf(fp, "addi $sp, $sp, -4\n");
 
-            // printf("li $a0 %d\n", root->val);
-            // printf("sw $a0, 0($sp)\n");
-            // printf("addi $sp, $sp, -4\n");
             return;
         }
         else if (root->kind == number && pos == 1)
         {
             fprintf(fp, "li $a0 %d\n", root->val);
-            // printf("li $a0 %d\n", root->val);
+
             return;
         }
         GenMIPs(root->left, -1);
@@ -77,9 +74,6 @@ static void GenMIPs(Node root, int pos)
             fprintf(fp, "add $a0, $a0, $t1\n");
             fprintf(fp, "addi $sp, $sp, 4\n");
 
-            // printf("lw $t1, 4($sp)\n");
-            // printf("add $a0, $a0, $t1\n");
-            // printf("addi $sp, $sp, 4\n");
             return;
         case minus:
 
@@ -87,9 +81,6 @@ static void GenMIPs(Node root, int pos)
             fprintf(fp, "sub $a0, $a0, $t1\n");
             fprintf(fp, "addi $sp, $sp, 4\n");
 
-            // printf("lw $t1, 4($sp)\n");
-            // printf("sub $a0, $a0, $t1\n");
-            // printf("addi $sp, $sp, 4\n");
             return;
         case times:
 
@@ -97,9 +88,6 @@ static void GenMIPs(Node root, int pos)
             fprintf(fp, "mul $a0, $a0, $t1\n");
             fprintf(fp, "addi $sp, $sp, 4\n");
 
-            // printf("lw $t1, 4($sp)\n");
-            // printf("mul $a0, $a0, $t1\n");
-            // printf("addi $sp, $sp, 4\n");
             return;
         case divide:
 
@@ -108,10 +96,6 @@ static void GenMIPs(Node root, int pos)
             fprintf(fp, "mflo $a0\n");
             fprintf(fp, "addi $sp, $sp, 4\n");
 
-            // printf("lw $t1, 4($sp)\n");
-            // printf("div $a0, $t1\n");
-            // printf("mflo $a0\n");
-            // printf("addi $sp, $sp, 4\n");
             return;
         case mod:
 
@@ -120,10 +104,6 @@ static void GenMIPs(Node root, int pos)
             fprintf(fp, "mfhi $a0\n");
             fprintf(fp, "addi $sp, $sp, 4\n");
 
-            // printf("lw $t1, 4($sp)\n");
-            // printf("div $a0, $t1\n");
-            // printf("mfhi $a0\n");
-            // printf("addi $sp, $sp, 4\n");
             return;
         }
     }
@@ -329,10 +309,9 @@ static Node Expr()
 int main(int argc, char *argv[])
 {
     fp = fopen("program.asm", "w");
-    // fprintf(fp, "This is line %d");
 
     fprintf(fp, ".text # text section \n.globl main # call main by SPIM \nmain:\n");
-    // printf(".text # text section \n.globl main # call main by SPIM \nmain:\n");
+
     register Node result;
     if (argc == 2)
     {
@@ -340,8 +319,7 @@ int main(int argc, char *argv[])
         sym = SGet();
         Node result = Expr();
         assert(sym == eof);
-        // printf("result = %d\n", result->val);
-        // Print(result, 0);
+
         GenMIPs(result, 0);
     }
     else
@@ -352,7 +330,5 @@ int main(int argc, char *argv[])
     fprintf(fp, "li   $v0, 1\nsyscall\n");
     fprintf(fp, "end:\nori   $v0, $0, 10  # system call 10 for exit\nsyscall            # we are out of here.\n");
 
-    // printf("li   $v0, 1\nsyscall\n");
-    // printf("end:\nori   $v0, $0, 10  # system call 10 for exit\nsyscall            # we are out of here.\n");
     return 0;
 }

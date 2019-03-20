@@ -6,7 +6,11 @@ sw $a0, 0($sp)
 addi $sp, $sp, -4
 li $a0 1
 lw $t1, 4($sp)
-add $a0, $a0, $t1
+mul $a0, $a0, $t1
+addi $sp, $sp, 4
+li $a0 1
+lw $t1, 4($sp)
+mul $a0, $a0, $t1
 addi $sp, $sp, 4
 li   $v0, 1
 syscall
