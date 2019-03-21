@@ -46,64 +46,55 @@ static void Number()
     }
 }
 
-static void GenMIPs(Node root, int pos)
+static void GenMIPs(Node root)
 {
     if (root != NULL)
     {
-        if (root->kind == number && pos == -1)
+        if (root->kind == number)
         {
             fprintf(fp, "li $a0 %d\n", root->val);
             fprintf(fp, "sw $a0, 0($sp)\n");
-            fprintf(fp, "addi $sp, $sp, -4\n");
+            fprintf(fp, "addi $sp, $sp, -4\n\n");
 
             return;
         }
-        else if (root->kind == number && pos == 1)
-        {
-            fprintf(fp, "li $a0 %d\n", root->val);
 
-            return;
-        }
-        GenMIPs(root->left, -1);
-        GenMIPs(root->right, 1);
+        GenMIPs(root->left);
+        GenMIPs(root->right);
 
         switch (root->kind)
         {
         case plus:
+            fprintf(fp, "addi $sp, $sp, 4\n");
             fprintf(fp, "lw $t1, 4($sp)\n");
             fprintf(fp, "add $a0, $a0, $t1\n");
-            fprintf(fp, "addi $sp, $sp, 4\n");
-
+            fprintf(fp, "sw  $a0, 4($sp)\n");
             return;
         case minus:
-
+            fprintf(fp, "addi $sp, $sp, 4\n");
             fprintf(fp, "lw $t1, 4($sp)\n");
             fprintf(fp, "sub $a0, $a0, $t1\n");
-            fprintf(fp, "addi $sp, $sp, 4\n");
-
+            fprintf(fp, "sw  $a0, 4($sp)\n");
             return;
         case times:
-
+            fprintf(fp, "addi $sp, $sp, 4\n");
             fprintf(fp, "lw $t1, 4($sp)\n");
             fprintf(fp, "mul $a0, $a0, $t1\n");
-            fprintf(fp, "addi $sp, $sp, 4\n");
-
+            fprintf(fp, "sw  $a0, 4($sp)\n");
             return;
         case divide:
-
+            fprintf(fp, "addi $sp, $sp, 4\n");
             fprintf(fp, "lw $t1, 4($sp)\n");
             fprintf(fp, "div $a0, $t1\n");
             fprintf(fp, "mflo $a0\n");
-            fprintf(fp, "addi $sp, $sp, 4\n");
-
+            fprintf(fp, "sw  $a0, 4($sp)\n");
             return;
         case mod:
-
+            fprintf(fp, "addi $sp, $sp, 4\n");
             fprintf(fp, "lw $t1, 4($sp)\n");
             fprintf(fp, "div $a0, $t1\n");
             fprintf(fp, "mfhi $a0\n");
-            fprintf(fp, "addi $sp, $sp, 4\n");
-
+            fprintf(fp, "sw  $a0, 4($sp)\n");
             return;
         }
     }
@@ -319,8 +310,8 @@ int main(int argc, char *argv[])
         sym = SGet();
         Node result = Expr();
         assert(sym == eof);
-
-        GenMIPs(result, 0);
+        Print(result, 1);
+        GenMIPs(result);
     }
     else
     {
