@@ -46,59 +46,163 @@ static void Number()
     }
 }
 
-static void GenMIPs(Node root)
+static void GenStackMIP(Node root, int pos)
 {
     if (root != NULL)
     {
-        if (root->kind == number)
+        if (root->kind == number && pos == -1)
         {
+            // printf("acc << %d\n", root->val);
+            // printf("push acc\n");
+
             fprintf(fp, "li $a0 %d\n", root->val);
-            fprintf(fp, "sw $a0, 0($sp)\n");
-            fprintf(fp, "addi $sp, $sp, -4\n\n");
+            fprintf(fp, "sw $a0 ,0($sp)\n");
+            fprintf(fp, "addi $sp ,$sp, -4\n");
 
             return;
         }
+        else if (root->kind == number && pos == 1)
+        {
+            // printf("acc << %d\n", root->val);
 
-        GenMIPs(root->left);
-        GenMIPs(root->right);
+            fprintf(fp, "li $a0 %d\n", root->val);
+            return;
+        }
+
+        GenStackMIP(root->left, -1);
+
+        GenStackMIP(root->right, 1);
 
         switch (root->kind)
         {
         case plus:
-            fprintf(fp, "addi $sp, $sp, 4\n");
+
             fprintf(fp, "lw $t1, 4($sp)\n");
-            fprintf(fp, "add $a0, $a0, $t1\n");
-            fprintf(fp, "sw  $a0, 4($sp)\n");
+            fprintf(fp, "add $a0, $t1, $a0\n");
+            fprintf(fp, "addi $sp, $sp, 4\n");
+
+            if (pos == -1)
+            {
+                // printf("push acc\n");
+                fprintf(fp, "sw $a0, 0($sp)\n");
+                fprintf(fp, "addi $sp, $sp, -4\n");
+            }
+
             return;
         case minus:
-            fprintf(fp, "addi $sp, $sp, 4\n");
+            // printf("acc << tos - acc\n");
+            // printf("pop\n");
             fprintf(fp, "lw $t1, 4($sp)\n");
             fprintf(fp, "sub $a0, $t1, $a0\n");
-            fprintf(fp, "sw  $a0, 4($sp)\n");
+            fprintf(fp, "addi $sp, $sp, 4\n");
+
+            if (pos == -1)
+            {
+                // printf("push acc\n");
+                fprintf(fp, "sw $a0, 0($sp)\n");
+                fprintf(fp, "addi $sp, $sp, -4\n");
+            }
             return;
         case times:
-            fprintf(fp, "addi $sp, $sp, 4\n");
             fprintf(fp, "lw $t1, 4($sp)\n");
-            fprintf(fp, "mul $a0, $a0, $t1\n");
-            fprintf(fp, "sw  $a0, 4($sp)\n");
+            fprintf(fp, "mul $a0, $t1, $a0\n");
+            fprintf(fp, "addi $sp, $sp, 4\n");
+            // printf("acc << acc * tos\n");
+            // printf("pop\n");
+            if (pos == -1)
+            {
+                // printf("push acc\n");
+                fprintf(fp, "sw $a0, 0($sp)\n");
+                fprintf(fp, "addi $sp, $sp, -4\n");
+            }
             return;
         case divide:
-            fprintf(fp, "addi $sp, $sp, 4\n");
+            // printf("acc << tos / acc\n");
+            // printf("pop\n");
+
             fprintf(fp, "lw $t1, 4($sp)\n");
             fprintf(fp, "div $t1, $a0\n");
             fprintf(fp, "mflo $a0\n");
-            fprintf(fp, "sw  $a0, 4($sp)\n");
+            fprintf(fp, "addi $sp, $sp, 4\n");
+            if (pos == -1)
+            {
+                // printf("push acc\n");
+                fprintf(fp, "sw $a0, 0($sp)\n");
+                fprintf(fp, "addi $sp, $sp, -4\n");
+            }
             return;
         case mod:
-            fprintf(fp, "addi $sp, $sp, 4\n");
+            // printf("acc << tos %% acc\n");
+            // printf("pop\n");
+
             fprintf(fp, "lw $t1, 4($sp)\n");
             fprintf(fp, "div $t1, $a0\n");
             fprintf(fp, "mfhi $a0\n");
-            fprintf(fp, "sw  $a0, 4($sp)\n");
+            fprintf(fp, "addi $sp, $sp, 4\n");
+            if (pos == -1)
+            {
+                // printf("push acc\n");
+                fprintf(fp, "sw $a0, 0($sp)\n");
+                fprintf(fp, "addi $sp, $sp, -4\n");
+            }
             return;
         }
     }
 }
+
+// static void GenMIPs(Node root)
+// {
+//     if (root != NULL)
+//     {
+//         if (root->kind == number)
+//         {
+//             fprintf(fp, "li $a0 %d\n", root->val);
+//             fprintf(fp, "sw $a0, 0($sp)\n");
+//             fprintf(fp, "addi $sp, $sp, -4\n\n");
+
+//             return;
+//         }
+
+//         GenMIPs(root->left);
+//         GenMIPs(root->right);
+
+//         switch (root->kind)
+//         {
+//         case plus:
+//             fprintf(fp, "addi $sp, $sp, 4\n");
+//             fprintf(fp, "lw $t1, 4($sp)\n");
+//             fprintf(fp, "add $a0, $a0, $t1\n");
+//             fprintf(fp, "sw  $a0, 4($sp)\n");
+//             return;
+//         case minus:
+//             fprintf(fp, "addi $sp, $sp, 4\n");
+//             fprintf(fp, "lw $t1, 4($sp)\n");
+//             fprintf(fp, "sub $a0, $t1, $a0\n");
+//             fprintf(fp, "sw  $a0, 4($sp)\n");
+//             return;
+//         case times:
+//             fprintf(fp, "addi $sp, $sp, 4\n");
+//             fprintf(fp, "lw $t1, 4($sp)\n");
+//             fprintf(fp, "mul $a0, $a0, $t1\n");
+//             fprintf(fp, "sw  $a0, 4($sp)\n");
+//             return;
+//         case divide:
+//             fprintf(fp, "addi $sp, $sp, 4\n");
+//             fprintf(fp, "lw $t1, 4($sp)\n");
+//             fprintf(fp, "div $t1, $a0\n");
+//             fprintf(fp, "mflo $a0\n");
+//             fprintf(fp, "sw  $a0, 4($sp)\n");
+//             return;
+//         case mod:
+//             fprintf(fp, "addi $sp, $sp, 4\n");
+//             fprintf(fp, "lw $t1, 4($sp)\n");
+//             fprintf(fp, "div $t1, $a0\n");
+//             fprintf(fp, "mfhi $a0\n");
+//             fprintf(fp, "sw  $a0, 4($sp)\n");
+//             return;
+//         }
+//     }
+// }
 
 static void Print(Node root, int level)
 {
@@ -311,14 +415,14 @@ int main(int argc, char *argv[])
         Node result = Expr();
         assert(sym == eof);
         Print(result, 1);
-        GenMIPs(result);
+        GenStackMIP(result, 0);
     }
     else
     {
         printf("usage: expreval <filename>\n");
     }
 
-    fprintf(fp, "li   $v0, 1\nsyscall\n");
+    fprintf(fp, "addi $sp, $sp, 4\nli   $v0, 1\nsyscall\n");
     fprintf(fp, "end:\nori   $v0, $0, 10  # system call 10 for exit\nsyscall            # we are out of here.\n");
 
     return 0;
