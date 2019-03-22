@@ -73,7 +73,7 @@ static void GenMIPs(Node root)
         case minus:
             fprintf(fp, "addi $sp, $sp, 4\n");
             fprintf(fp, "lw $t1, 4($sp)\n");
-            fprintf(fp, "sub $a0, $a0, $t1\n");
+            fprintf(fp, "sub $a0, $t1, $a0\n");
             fprintf(fp, "sw  $a0, 4($sp)\n");
             return;
         case times:
@@ -85,14 +85,14 @@ static void GenMIPs(Node root)
         case divide:
             fprintf(fp, "addi $sp, $sp, 4\n");
             fprintf(fp, "lw $t1, 4($sp)\n");
-            fprintf(fp, "div $a0, $t1\n");
+            fprintf(fp, "div $t1, $a0\n");
             fprintf(fp, "mflo $a0\n");
             fprintf(fp, "sw  $a0, 4($sp)\n");
             return;
         case mod:
             fprintf(fp, "addi $sp, $sp, 4\n");
             fprintf(fp, "lw $t1, 4($sp)\n");
-            fprintf(fp, "div $a0, $t1\n");
+            fprintf(fp, "div $t1, $a0\n");
             fprintf(fp, "mfhi $a0\n");
             fprintf(fp, "sw  $a0, 4($sp)\n");
             return;
