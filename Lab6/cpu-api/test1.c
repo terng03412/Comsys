@@ -1,19 +1,21 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <fcntl.h>
 
 int main(void)
 {
-    char **argv = (char **)malloc(3 * sizeof(char *));
-    argv[0] = "/bin/ls";
-    argv[1] = ".";
-    argv[2] = NULL;
-    for (int i = 0; i < 10; i++)
+    int fd;
+    fd = open("output.txt", O_CREAT | O_TRUNC | O_WRONLY, 0666);
+    if (!fork())
     {
-        printf("%d\n", i);
-        if (i == 9)
-        {
-            execv("/bin/ls", argv);
-        }
+        write(fd, "hello ", 6);
+        exit(0);
+    }
+    else
+    {
+        int status;
+        wait(&status);
+        write(fd, "world\n", 6);
     }
 }

@@ -5,17 +5,17 @@
 #include "common.h"
 #include "common_threads.h"
 
-void *task(void *arg)
+void *worker(void *arg)
 {
-    pid_t pid = getpid();
-    printf("My pid is %d\n", pid);
+    printf("Worker\n");
     return NULL;
 }
 
 int main()
 {
     pthread_t thread;
-    pthread_create(&thread, NULL, &task, NULL);
-    task(NULL);
+    pthread_create(&thread, NULL, &worker, NULL);
+    pthread_yield_np();
+    printf("Main\n");
     return 0;
 }
