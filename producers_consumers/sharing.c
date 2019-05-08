@@ -5,7 +5,7 @@
 
 #include "common_threads.h"
 
-#define N 2
+#define N 10
 void *thread(void *vargp);
 
 char **ptr; /* Global variable */ //line:conc:sharing:ptrdec

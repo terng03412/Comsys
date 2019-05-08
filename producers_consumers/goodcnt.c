@@ -1,5 +1,5 @@
-/*
- * goodcnt.c - A correctly synchronized counter program
+/* 
+ * goodcnt.c - A correctly synchronized counter program 
  */
 /* $begin goodcnt */
 #include <stdio.h>
@@ -29,7 +29,9 @@ sem_t mutex;
 int main(int argc, char **argv)
 {
     int niters;
-    pthread_t tid1, tid2;
+    int num_thread = 10;
+    // pthread_t tid[0], tid[1];
+    pthread_t tid[num_thread];
 
     /* Check input argument */
     if (argc != 2)
@@ -47,13 +49,15 @@ int main(int argc, char **argv)
     Sem_init(&mutex, 0, 1); /* mutex = 1 */
                             /* $end goodcntseminit */
 #endif
-    Pthread_create(&tid1, NULL, thread, &niters);
-    Pthread_create(&tid2, NULL, thread, &niters);
-    Pthread_join(tid1, NULL);
-    Pthread_join(tid2, NULL);
+
+    for (int j = 0; j < num_thread; j++)
+    {
+        Pthread_create(&tid[j], NULL, thread, &j);
+        Pthread_join(tid[j], NULL);
+    }
 
     /* Check result */
-    if (cnt != (2 * niters))
+    if (cnt != (num_thread * niters))
         printf("BOOM! cnt=%ld\n", cnt);
     else
         printf("OK cnt=%ld\n", cnt);
@@ -63,9 +67,10 @@ int main(int argc, char **argv)
 /* Thread routine */
 void *thread(void *vargp)
 {
+    int tid = *((int *)vargp);
+    printf("tid = %d \n", tid);
     int i, niters = *((int *)vargp);
     static int numt = 0;
-
     printf("thread num = %d doing %d iterations\n", ++numt, niters);
 
     /* $begin goodcntthread */

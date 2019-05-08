@@ -44,7 +44,7 @@ int main(int argc, char *argv[])
     fprintf(stderr, "Malloc unsuccessful\n");
     exit(0);
   }
-  // Initialize buffer of size 1M
+  // Initialize buffer of size 5
   sbuf_init(shared_data, 5);
   
   Pthread_create(&p1, NULL, consumer, "1");
