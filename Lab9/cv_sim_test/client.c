@@ -53,7 +53,7 @@ void *consumer(void *arg)
 
 int main(int argc, char *argv[])
 {
-	int consumers = 4;
+	// int consumers = 4;
 	// pthread_t c[consumers];
 
 	pthread_t p1, p2, p3, p4;
