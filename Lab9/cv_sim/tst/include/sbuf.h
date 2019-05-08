@@ -1,5 +1,5 @@
-#ifndef __sbuf_H__
-#define __sbuf_H__
+#ifndef __SBUF_H__
+#define __SBUF_H__
 
 #include <stdio.h>
 #include <stdlib.h>

@@ -9,9 +9,6 @@
 #include "sbuf.h"
 
 sbuf_t *shared_data;
-// pthread_cond_t empty = PTHREAD_COND_INITIALIZER;
-// pthread_cond_t fill = PTHREAD_COND_INITIALIZER;
-// pthread_mutex_t m = PTHREAD_MUTEX_INITIALIZER;
 
 void *producer(void *arg)
 {
