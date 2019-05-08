@@ -28,7 +28,6 @@ void shared_data_insert(sbuf *sp, int item, char *num)
 
   printf("I am a Producer # %c inserting item %d from Producer # %c\n", sp->id[idx], item, sp->id[idx]);
   printf("Number of items in list now is %d\n", remain);
-  sleep(1);
 }
 void shared_data_remove(sbuf *sp, char *num)
 {
@@ -39,5 +38,4 @@ void shared_data_remove(sbuf *sp, char *num)
   int remain = sp->rear - sp->front;
   printf("I am a consumer # %c consuming item %d from Producer # %c\n", num[0], item, sp->id[idx]);
   printf("Number of items in list now is %d\n", remain);
-  sleep(1);
 }
