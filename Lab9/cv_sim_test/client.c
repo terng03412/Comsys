@@ -54,9 +54,9 @@ void *consumer(void *arg)
 int main(int argc, char *argv[])
 {
 	int consumers = 4;
-	pthread_t c[consumers];
-	pthread_t p;
-	// pthread_t p1, p2, p3, p4;
+	// pthread_t c[consumers];
+
+	pthread_t p1, p2, p3, p4;
 
 	printf("size of sd = %lu\n", sizeof(sbuf));
 	shared_data = malloc(sizeof(sbuf));
@@ -68,29 +68,16 @@ int main(int argc, char *argv[])
 	// init max size
 	shared_data_init(shared_data, 5);
 
-	for (int i = 0; i < consumers; i++)
-	{
-		Pthread_create(&c[i], NULL, consumer, "1");
-	}
-
-	Pthread_create(&p, NULL, producer, "2");
-	// Pthread_create(&p1, NULL, consumer, "1");
-	// Pthread_create(&p2, NULL, producer, "1");
-	// Pthread_create(&p3, NULL, consumer, "2");
-	// Pthread_create(&p4, NULL, producer, "2");
+	Pthread_create(&p1, NULL, consumer, "1");
+	Pthread_create(&p2, NULL, producer, "1");
+	Pthread_create(&p3, NULL, consumer, "2");
+	Pthread_create(&p4, NULL, producer, "2");
 
 	// join thread after finish
-	for (int i = 0; i < consumers; i++)
-	{
-		Pthread_join(&c[i], NULL);
-	}
-	Pthread_join(&p, NULL);
-	// Pthread_create(&p, NULL, producer, "2");
-
-	// Pthread_join(p1, NULL);
-	// Pthread_join(p2, NULL);
-	// Pthread_join(p3, NULL);
-	// Pthread_join(p4, NULL);
+	Pthread_join(p1, NULL);
+	Pthread_join(p2, NULL);
+	Pthread_join(p3, NULL);
+	Pthread_join(p4, NULL);
 
 	return 0;
 }
