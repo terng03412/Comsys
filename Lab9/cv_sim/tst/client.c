@@ -26,7 +26,7 @@ void *producer(void *arg)
             Pthread_cond_wait(&(shared_data->cond), &(shared_data->mutex));
         }
         // insert item
-        sbuf_insert(shared_data, item, msg);
+        shared_data_insert(shared_data, item, msg);
         item++;
         Pthread_cond_signal(&(shared_data->cond)); // signal to sleep thread
         Pthread_mutex_unlock(&(shared_data->mutex));
@@ -47,7 +47,7 @@ void *consumer(void *arg)
             Pthread_cond_wait(&(shared_data->cond), &(shared_data->mutex));
         }
         // remove item shared_data
-        sbuf_remove(shared_data, msg);
+        shared_data_remove(shared_data, msg);
         Pthread_cond_signal(&(shared_data->cond)); // signal to sleep thread
         Pthread_mutex_unlock(&(shared_data->mutex));
     }
@@ -67,7 +67,7 @@ int main(int argc, char *argv[])
         exit(0);
     }
     // Initialize buffer of size 5
-    sbuf_init(shared_data, 5);
+    shared_data_init(shared_data, 5);
 
     pthread_t pid, cid[consumers];
 
