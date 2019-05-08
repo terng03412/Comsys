@@ -47,7 +47,6 @@ void sbuf_insert(sbuf_t *sp, int item, char *msg)
   printf("Number of items in queue now is %d\n", sp->rear - sp->front);
   // V(&sp->mutex); /* Unlock the buffer */
   // V(&sp->items); /* Announce available item */
-  sleep(1);
 }
 /* $end sbuf_insert */
 
@@ -65,7 +64,6 @@ int sbuf_remove(sbuf_t *sp, char *msg)
   // V(&sp->mutex); /* Unlock the buffer */
   // V(&sp->slots); /* Announce available slot */
   // return item;
-  sleep(1);
 }
 /* $end sbuf_remove */
 /* $end sbufc */
