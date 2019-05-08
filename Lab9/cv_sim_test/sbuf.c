@@ -13,7 +13,7 @@ void shared_data_init(sbuf *sp, int n)
   sp->buf = p;
   assert((p = malloc(sizeof(char))) != NULL);
   sp->id = p;
-  sp->max = n; // init max size
+  sp->n = n; // init n size
   sp->front = 0;
   sp->rear = 0; // start shared_data
 }
@@ -21,7 +21,7 @@ void shared_data_init(sbuf *sp, int n)
 void shared_data_insert(sbuf *sp, int item, char *num)
 {
   int idx;
-  idx = (sp->rear + 1) % (sp->max);
+  idx = (sp->rear + 1) % (sp->n);
   sp->rear++;
   sp->buf[idx] = item; // insert
   sp->id[idx] = num[0];
@@ -34,7 +34,7 @@ void shared_data_insert(sbuf *sp, int item, char *num)
 void shared_data_remove(sbuf *sp, char *num)
 {
   int item, idx;
-  idx = (sp->front + 1) % (sp->max);
+  idx = (sp->front + 1) % (sp->n);
   sp->front++;
   item = sp->buf[idx]; // remove
   int remain = sp->rear - sp->front;

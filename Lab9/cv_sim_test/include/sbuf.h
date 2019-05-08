@@ -10,7 +10,7 @@ typedef struct
 {
   int *buf;
   int *id;
-  int max;   // max slot
+  int n;     // max slot
   int front; // (front+1)%max --> first item
   int rear;  // rear%n --> last item
   pthread_mutex_t mutex;

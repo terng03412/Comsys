@@ -17,7 +17,7 @@ void *producer(void *arg)
 	{
 		Pthread_mutex_lock(&(shared_data->mutex));
 		//check shared_data is full or not if(full)? wait:continue
-		while (shared_data->rear - shared_data->front >= shared_data->max)
+		while (shared_data->rear - shared_data->front >= shared_data->n)
 		{
 			Pthread_cond_wait(&(shared_data->cond), &(shared_data->mutex));
 		}
@@ -56,7 +56,7 @@ int main(int argc, char *argv[])
 	// int consumers = 4;
 	// pthread_t c[consumers];
 
-	pthread_t p1, p2, p3, p4;
+	pthread_t p1, p2, p3, p4, p5, p6, p7, p8;
 
 	printf("size of sd = %lu\n", sizeof(sbuf));
 	shared_data = malloc(sizeof(sbuf));
@@ -72,12 +72,20 @@ int main(int argc, char *argv[])
 	Pthread_create(&p2, NULL, producer, "1");
 	Pthread_create(&p3, NULL, consumer, "2");
 	Pthread_create(&p4, NULL, producer, "2");
+	Pthread_create(&p5, NULL, consumer, "2");
+	Pthread_create(&p6, NULL, consumer, "2");
+	Pthread_create(&p7, NULL, consumer, "2");
+	Pthread_create(&p8, NULL, consumer, "2");
 
 	// join thread after finish
 	Pthread_join(p1, NULL);
 	Pthread_join(p2, NULL);
 	Pthread_join(p3, NULL);
 	Pthread_join(p4, NULL);
+	Pthread_join(p5, NULL);
+	Pthread_join(p6, NULL);
+	Pthread_join(p7, NULL);
+	Pthread_join(p8, NULL);
 
 	return 0;
 }
