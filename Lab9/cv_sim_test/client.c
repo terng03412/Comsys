@@ -16,7 +16,7 @@ void *producer(void *arg)
 	while (1)
 	{
 		Pthread_mutex_lock(&(shared_data->mutex));
-		//check shared_data is full or not if(full)? wait:continue
+		//check shared_data is full ?
 		while (shared_data->rear - shared_data->front >= shared_data->n)
 		{
 			Pthread_cond_wait(&(shared_data->cond), &(shared_data->mutex));
@@ -37,7 +37,7 @@ void *consumer(void *arg)
 	while (1)
 	{
 		Pthread_mutex_lock(&(shared_data->mutex));
-		//check shared_data is empty or not if(empty)? wait:continue
+		//check shared_data is empty?
 		while (shared_data->rear - shared_data->front <= 0)
 		{
 			Pthread_cond_wait(&(shared_data->cond), &(shared_data->mutex));

@@ -13,9 +13,8 @@ void shared_data_init(sbuf *sp, int n)
   sp->buf = p;
   assert((p = malloc(sizeof(char))) != NULL);
   sp->id = p;
-  sp->n = n; // init n size
-  sp->front = 0;
-  sp->rear = 0; // start shared_data
+  sp->n = n;                // init max size
+  sp->front = sp->rear = 0; // start shared_data
 }
 
 void shared_data_insert(sbuf *sp, int item, char *num)
@@ -23,12 +22,12 @@ void shared_data_insert(sbuf *sp, int item, char *num)
   int idx;
   idx = (sp->rear + 1) % (sp->n);
   sp->rear++;
-  sp->buf[idx] = item; // insert
+  sp->buf[idx] = item; // insert item
   sp->id[idx] = num[0];
   int remain = sp->rear - sp->front;
 
-  printf("I am a PRODUCER # %c inserting item %d from PRODUCER # %c\n", sp->id[idx], item, sp->id[idx]);
-  printf("Number of items in shared_data now is %d\n", remain);
+  printf("I am a Producer # %c inserting item %d from Producer # %c\n", sp->id[idx], item, sp->id[idx]);
+  printf("Number of items in list now is %d\n", remain);
   sleep(1);
 }
 void shared_data_remove(sbuf *sp, char *num)
@@ -38,7 +37,7 @@ void shared_data_remove(sbuf *sp, char *num)
   sp->front++;
   item = sp->buf[idx]; // remove
   int remain = sp->rear - sp->front;
-  printf("I am a consumer # %c consuming item %d from producer # %c\n", num[0], item, sp->id[idx]);
-  printf("Number of items in shared_data now is %d\n", remain);
+  printf("I am a consumer # %c consuming item %d from Producer # %c\n", num[0], item, sp->id[idx]);
+  printf("Number of items in list now is %d\n", remain);
   sleep(1);
 }
