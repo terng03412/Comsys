@@ -12,7 +12,7 @@ typedef struct
   int *id;
   int max;   // max slot
   int front; // (front+1)%max --> first item
-  int back;  // rear%n --> last item
+  int rear;  // rear%n --> last item
   pthread_mutex_t mutex;
   pthread_cond_t cond;
 } sbuf;
